@@ -7,4 +7,4 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::middleware('api')->prefix('api/v1')->group(base_path('routes/api/api_v1.php'));
+Route::middleware('api')->prefix('v1')->group(base_path('routes/api/api_v1.php'));
