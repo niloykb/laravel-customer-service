@@ -17,9 +17,13 @@ class CustomerResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
+            'type' => $this->type,
             'email' => $this->email,
+            'city' => $this->city,
+            'state' => $this->state,
             'address' => $this->address,
-            'postalCode' => $this->postal_code
+            'postalCode' => $this->postal_code,
+            'invoices' => InvoiceResource::collection($this->whenLoaded('invoices'))
         ];
     }
 }
