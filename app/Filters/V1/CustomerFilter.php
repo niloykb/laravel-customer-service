@@ -3,6 +3,7 @@
 namespace App\Filters\V1;
 
 use App\Filters\ApiFilter;
+use Illuminate\Http\Request;
 
 class CustomerFilter extends ApiFilter
 {
@@ -27,4 +28,21 @@ class CustomerFilter extends ApiFilter
         'gt' => '>',
         'gte' => '>='
     ];
+
+    public function transform(Request $request)
+    {
+        $eloQuery = parent::transform($request);
+
+        $this->addNameFilter($eloQuery, $request->filter_value);
+
+        return $eloQuery;
+    }
+
+    private function addNameFilter(&$eloQuery, $filterValue)
+    {
+        if (!empty($filterValue)) {
+            $eloQuery[] = ['name', 'LIKE', "%{$filterValue}%"];
+        }
+    }
+
 }
