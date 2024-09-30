@@ -19,12 +19,14 @@ class CustomerController extends Controller
      */
     public function index(Request $request)
     {
+
         $filter = new CustomerFilter();
         $filterItems = $filter->transform($request);
         $includeInvoices = $request->query('includeInvoices');
 
-        $sort = $request->query('sort', 'id');
-        $order = $request->query('order', 'desc');
+        $sort = $request->sort ?? 'id';
+        $order = $request->order ?? 'desc';
+        $pageSize = $request->page_size ?? 15;
 
         $customers = Customer::where($filterItems)->orderBy($sort, $order);
 
@@ -32,8 +34,7 @@ class CustomerController extends Controller
             $customers =  $customers->with('invoices');
         }
 
-        return new CustomerCollection($customers->paginate()->appends($request->query()));
-   
+        return new CustomerCollection($customers->paginate($pageSize)->appends($request->query()));
     }
 
     /**
