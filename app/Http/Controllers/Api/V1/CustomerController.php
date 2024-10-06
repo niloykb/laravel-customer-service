@@ -66,7 +66,7 @@ class CustomerController extends Controller
     {
         $customer->update($request->all());
 
-        // return new CustomerResource($customer);
+        return new CustomerResource($customer);;
     }
 
     /**
