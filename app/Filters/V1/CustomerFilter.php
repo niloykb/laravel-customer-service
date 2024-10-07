@@ -3,6 +3,7 @@
 namespace App\Filters\V1;
 
 use App\Filters\ApiFilter;
+use App\Models\Customer;
 use Illuminate\Http\Request;
 
 class CustomerFilter extends ApiFilter
@@ -29,20 +30,31 @@ class CustomerFilter extends ApiFilter
         'gte' => '>='
     ];
 
-    public function transform(Request $request)
+
+    protected $columns = ['name', 'email', 'city', 'state', 'address', 'postal_code'];
+
+    public function search(Request $request)
     {
-        $eloQuery = parent::transform($request);
+        $filterItems = parent::transform($request);
 
-        $this->addNameFilter($eloQuery, $request->filter_value);
+        $query = Customer::query();
 
-        return $eloQuery;
-    }
-
-    private function addNameFilter(&$eloQuery, $filterValue)
-    {
-        if (!empty($filterValue)) {
-            $eloQuery[] = ['name', 'LIKE', "%{$filterValue}%"];
+        if ($request->has('filter_value')) {
+            $query->where(function ($query) use ($request) {
+                foreach ($this->columns as $column) {
+                    $query->orWhere($column, 'like', "%{$request->filter_value}%");
+                }
+            });
         }
-    }
 
+        if ($request->has('sort')) {
+            $query->orderBy($request->sort, $request->order ?? 'asc');
+        }
+
+        $query->when($request->query('includeInvoices'), function ($query) {
+            return $query->with('invoices');
+        })->where($filterItems);   
+
+        return $query;
+    }
 }

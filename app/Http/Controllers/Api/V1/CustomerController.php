@@ -17,24 +17,23 @@ class CustomerController extends Controller
     /**
      * Display a listing of the resource.
      */
+
+
+    protected $customerFilter;
+
+    public function __construct(CustomerFilter $customerFilter)
+    {
+        $this->customerFilter = $customerFilter;
+    }
+
     public function index(Request $request)
     {
+        
+        $customers = $this->customerFilter->search($request);
 
-        $filter = new CustomerFilter();
-        $filterItems = $filter->transform($request);
-        $includeInvoices = $request->query('includeInvoices');
+        $paginatedCustomers = $customers->paginate($request->input('page_size', 15));
 
-        $sort = $request->sort ?? 'id';
-        $order = $request->order ?? 'desc';
-        $pageSize = $request->page_size ?? 15;
-
-        $customers = Customer::where($filterItems)->orderBy($sort, $order);
-
-        if ($includeInvoices) {
-            $customers =  $customers->with('invoices');
-        }
-
-        return new CustomerCollection($customers->paginate($pageSize)->appends($request->query()));
+        return new CustomerCollection($paginatedCustomers);
     }
 
     /**
